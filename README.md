@@ -10,22 +10,35 @@ A demo project for managing inspector work schedules and assessments across mult
 - **Location Management** - Multi-country support with timezone handling
 - **Job Assignment & Completion** - Inspectors can assign themselves to jobs and submit assessments
 - **RESTful API** with comprehensive OpenAPI/Swagger documentation
+- **Modern Web Interface** - React-based frontend with responsive design
 
 ## Tech Stack
 
-- **Backend:** PHP 8.4 (Symfony 7.4 + API Platform 4.2)
-- **Web Server:** FrankenPHP (built on Caddy)
-- **Database:** MySQL 8.4
-- **Cache/Session:** Redis 7
-- **API Documentation:** NelmioApiDocBundle with Swagger UI
-- **Containerization:** Docker Compose
+**Backend:**
+
+- PHP 8.4 (Symfony 7.4 + API Platform 4.2)
+- FrankenPHP (built on Caddy)
+- MySQL 8.4
+- Redis 7
+- NelmioApiDocBundle with Swagger UI
+
+**Frontend:**
+
+- React 18 with TypeScript
+- Vite
+- TanStack Query (React Query)
+- Axios
+- Tailwind CSS + shadcn/ui
+- React Router
+
+**Containerization:** Docker Compose
 
 ## Quick Start
 
 ### Prerequisites
 
 - Docker and Docker Compose installed
-- Port 443, 3306, and 6379 available
+- Ports 443, 5173, 3306, and 6379 available
 
 ### Installation
 
@@ -55,10 +68,11 @@ A demo project for managing inspector work schedules and assessments across mult
    ```
 
 5. **Access the application**
-   - API Base URL: `https://localhost`
-   - API Documentation: `https://localhost/api/docs`
+   - **Frontend Web App:** `http://localhost:5173`
+   - **API Base URL:** `https://localhost`
+   - **API Documentation:** `https://localhost/api/docs`
 
-   > **Note:** You'll see a browser warning about the self-signed SSL certificate. This is expected in development - click "Advanced" and proceed.
+   > **Note:** You'll see a browser warning about the self-signed SSL certificate when accessing the API directly. This is expected in development - click "Advanced" and proceed. The frontend at port 5173 doesn't require this.
 
 ## Test Credentials
 
@@ -152,6 +166,7 @@ The API uses session-based authentication with cookies:
 ### Useful Commands
 
 ```bash
+# Backend commands
 # Clear Symfony cache
 docker exec inspector-system-backend-1 php bin/console cache:clear
 
@@ -164,6 +179,14 @@ docker exec inspector-system-backend-1 php bin/console make:migration
 # View all routes
 docker exec inspector-system-backend-1 php bin/console debug:router
 
+# Frontend commands
+# Install dependencies (if needed)
+docker exec inspector-system-frontend-1 npm install
+
+# View frontend logs
+docker compose logs -f frontend
+
+# Database & Cache
 # Access MySQL CLI
 docker exec -it inspector-system-db-1 mysql -u user -ppass inspection_db
 
@@ -172,6 +195,7 @@ docker exec -it inspector-system-redis-1 redis-cli
 
 # View logs
 docker compose logs -f backend
+docker compose logs -f frontend
 ```
 
 ### Project Structure
@@ -189,9 +213,39 @@ inspector-system/
 │   ├── config/               # Symfony configuration
 │   ├── migrations/           # Database migrations
 │   └── public/               # Web root
+├── frontend/
+│   ├── src/
+│   │   ├── components/       # Reusable UI components
+│   │   │   └── ui/           # shadcn/ui components
+│   │   ├── contexts/         # React contexts (Auth)
+│   │   ├── lib/              # Utilities and API client
+│   │   ├── pages/            # Page components
+│   │   ├── services/         # API service functions
+│   │   └── types/            # TypeScript types
+│   └── public/               # Static assets
 ├── compose.yaml              # Docker Compose configuration
 └── README.md                 # This file
 ```
+
+## Web Interface
+
+The frontend provides an intuitive interface for inspectors:
+
+**Login/Register:**
+
+- Use the test credentials to login or register a new inspector account
+- Session is maintained via cookies with 1-week remember me
+
+**Inspector Dashboard:**
+
+- **Available Jobs Tab:** Browse and view all available jobs in your location
+  - View job details (title, description, location, created date)
+  - Assign jobs to yourself with a scheduled date (in your timezone)
+- **My Jobs Tab:** View your assigned and completed jobs
+  - See scheduled dates in your timezone
+  - Complete jobs by submitting assessments
+  - Optional completion date (defaults to current time)
+  - View past completed jobs with assessments
 
 ## API Documentation
 

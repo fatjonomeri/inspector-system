@@ -90,8 +90,8 @@ class AuthController extends AbstractController
             ], Response::HTTP_CONFLICT);
         }
 
-        // Find location by code
-        $location = $this->locationRepository->findByCode($data['location']);
+        $locationId = (int) basename($data['location']);
+        $location = $this->locationRepository->find($locationId);
         if (!$location) {
             return new JsonResponse([
                 'success' => false,

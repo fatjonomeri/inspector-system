@@ -15,6 +15,25 @@ services:
       - ./backend:/app
       - caddy_data:/data
       - caddy_config:/config
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - HOST=0.0.0.0
+    depends_on:
+      - backend
+    networks:
+      - app-network
 
   db:
     image: mysql:8.4
@@ -28,6 +47,8 @@ services:
       - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
+    networks:
+      - app-network
 
   redis:
     image: redis:7-alpine
@@ -36,9 +57,15 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    networks:
+      - app-network
 
 volumes:
   caddy_data:
   caddy_config:
   db_data:
   redis_data:
+
+networks:
+  app-network:
+    driver: bridge

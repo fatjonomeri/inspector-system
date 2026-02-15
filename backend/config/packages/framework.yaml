@@ -5,10 +5,11 @@ framework:
     # Note that the session will be started ONLY if you read or write from it.
     session:
         handler_id: "snc_redis.session.handler"
-        cookie_secure: auto
+        cookie_secure: false
         cookie_samesite: lax
+        cookie_httponly: true
         cookie_lifetime: 0
-        gc_maxlifetime: 3600
+        gc_maxlifetime: 604800
 
     #esi: true
     #fragments: true

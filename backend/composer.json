@@ -12,6 +12,7 @@
         "doctrine/doctrine-migrations-bundle": "^3.7",
         "doctrine/orm": "^3.6.2",
         "nelmio/api-doc-bundle": "^5.9",
+        "nelmio/cors-bundle": "^2.6",
         "predis/predis": "^2.4.1",
         "snc/redis-bundle": "^4.11.1",
         "symfony/asset": "7.4.*",
