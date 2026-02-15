@@ -3,8 +3,8 @@ api_platform:
     version: 1.0.0
     description: "API for managing inspector work schedules and assessments across UK, Mexico, and India"
     formats:
-        json: ['application/json']
-        jsonld: ['application/ld+json']
+        json: ["application/json"]
+        jsonld: ["application/ld+json"]
     defaults:
         stateless: false
         cache_headers:

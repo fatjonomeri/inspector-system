@@ -37,4 +37,8 @@ services:
     # Logout success handler
     App\Security\LogoutSuccessHandler:
         tags:
-            - { name: 'kernel.event_listener', event: 'Symfony\Component\Security\Http\Event\LogoutEvent', method: 'onLogout' }
+            - {
+                  name: "kernel.event_listener",
+                  event: 'Symfony\Component\Security\Http\Event\LogoutEvent',
+                  method: "onLogout",
+              }

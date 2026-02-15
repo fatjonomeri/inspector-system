@@ -14,4 +14,4 @@ api_doc:
     methods: [GET, HEAD]
     controller: nelmio_api_doc.controller.swagger_ui
     requirements:
-        _format: 'json|html'
+        _format: "json|html"
