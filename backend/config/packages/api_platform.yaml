@@ -1,7 +1,12 @@
 api_platform:
-    title: Hello API Platform
+    title: Inspector System API
     version: 1.0.0
+    description: "API for managing inspector work schedules and assessments across UK, Mexico, and India"
     defaults:
-        stateless: true
+        stateless: false
         cache_headers:
-            vary: ['Content-Type', 'Authorization', 'Origin']
+            vary: ["Content-Type", "Authorization", "Origin"]
+    swagger:
+        versions: [3]
+    enable_swagger_ui: true
+    enable_re_doc: true

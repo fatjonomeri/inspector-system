@@ -1,13 +1,16 @@
 services:
   backend:
-    image: dunglas/frankenphp:1-php8.4-alpine
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     restart: unless-stopped
     ports:
-      - "8000:80" # API will be at localhost:8000
+      - "8000:80"
       - "443:443"
     environment:
       SERVER_NAME: localhost, backend:80
       DATABASE_URL: "mysql://user:pass@db:3306/inspection_db?serverVersion=8.4.0&charset=utf8mb4"
+      REDIS_URL: "redis://redis:6379"
     volumes:
       - ./backend:/app
       - caddy_data:/data
@@ -26,7 +29,16 @@ services:
     volumes:
       - db_data:/var/lib/mysql
 
+  redis:
+    image: redis:7-alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
 volumes:
   caddy_data:
   caddy_config:
   db_data:
+  redis_data:
