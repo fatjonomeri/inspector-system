@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
@@ -16,26 +18,29 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Table(name: 'jobs')]
 #[ApiResource(
     operations: [
-        new Get(),
-        new GetCollection(),
-        new Post(security: "is_granted('ROLE_ADMIN')"),
-        new Patch(
-            uriTemplate: '/jobs/{id}/assign',
-            security: "is_granted('ROLE_INSPECTOR')",
-            denormalizationContext: ['groups' => ['job:assign']]
-        ),
-        new Patch(
-            uriTemplate: '/jobs/{id}/complete',
-            security: "is_granted('ROLE_INSPECTOR') and object.getAssignedTo() == user",
-            denormalizationContext: ['groups' => ['job:complete']]
-        )
+        new Get(security: "
+            is_granted('ROLE_ADMIN') or (
+                is_granted('ROLE_INSPECTOR') and (
+                    (object.getStatus() == 'available' and object.getLocation() == user.getLocation()) 
+                    or 
+                    (object.getAssignedTo() == user)
+                )
+            )
+        "),
+        new GetCollection(security: "is_granted('ROLE_ADMIN')"),
+        new Post(security: "is_granted('ROLE_ADMIN')")
     ]
 )]
+#[ApiFilter(SearchFilter::class, properties: ['status' => 'exact', 'location.id' => 'exact'])]
 class Job
 {
     public const STATUS_AVAILABLE = 'available';
     public const STATUS_ASSIGNED = 'assigned';
     public const STATUS_COMPLETED = 'completed';
+
+    public const LOCATION_UK = 'UK';
+    public const LOCATION_MEXICO = 'Mexico';
+    public const LOCATION_INDIA = 'India';
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -66,9 +71,9 @@ class Job
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $assessment = null;
 
+    #[Assert\NotBlank]
     #[ORM\ManyToOne(targetEntity: Location::class)]
-    #[ORM\JoinColumn(nullable: false, onDelete: 'RESTRICT')]
-    #[Assert\NotNull(message: 'Location is required')]
+    #[ORM\JoinColumn(nullable: false)]
     private ?Location $location = null;
 
     #[ORM\Column]
@@ -211,14 +216,14 @@ class Job
         $this->updatedAt = new \DateTimeImmutable();
     }
 
-    public function complete(string $assessment): void
+    public function complete(string $assessment, ?\DateTimeImmutable $completedAt = null): void
     {
         if ($this->status !== self::STATUS_ASSIGNED) {
             throw new \LogicException('Only assigned jobs can be completed');
         }
 
         $this->assessment = $assessment;
-        $this->completedAt = new \DateTimeImmutable();
+        $this->completedAt = $completedAt ?? new \DateTimeImmutable();
         $this->status = self::STATUS_COMPLETED;
         $this->updatedAt = new \DateTimeImmutable();
     }

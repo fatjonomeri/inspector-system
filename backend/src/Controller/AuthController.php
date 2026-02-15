@@ -209,59 +209,22 @@ class AuthController extends AbstractController
         path: '/api/auth/logout',
         summary: 'Logout and destroy session',
         responses: [
-            new OA\Response(response: 200, description: 'Logged out successfully')
-        ]
-    )]
-    public function logout(): JsonResponse
-    {
-        return new JsonResponse([
-            'success' => true,
-            'message' => 'Logged out successfully'
-        ]);
-    }
-
-    #[Route('/me', name: 'me', methods: ['GET'])]
-    #[OA\Get(
-        path: '/api/auth/me',
-        summary: 'Get current authenticated user',
-        responses: [
             new OA\Response(
                 response: 200,
-                description: 'Current user information',
+                description: 'Logged out successfully',
                 content: new OA\JsonContent(
                     properties: [
                         new OA\Property(property: 'success', type: 'boolean', example: true),
-                        new OA\Property(property: 'user', type: 'object')
+                        new OA\Property(property: 'message', type: 'string', example: 'Logged out successfully')
                     ]
                 )
-            ),
-            new OA\Response(response: 401, description: 'Not authenticated')
+            )
         ]
     )]
-    public function me(): JsonResponse
+    public function logout(): void
     {
-        $user = $this->getUser();
-
-        if (!$user instanceof User) {
-            return new JsonResponse([
-                'success' => false,
-                'message' => 'Not authenticated'
-            ], Response::HTTP_UNAUTHORIZED);
-        }
-
-        return new JsonResponse([
-            'success' => true,
-            'user' => [
-                'id' => $user->getId(),
-                'email' => $user->getEmail(),
-                'roles' => $user->getRoles(),
-                'location' => $user->getLocation()?->getCode(),
-                'firstName' => $user->getFirstName(),
-                'lastName' => $user->getLastName(),
-                'timezone' => $user->getTimezone(),
-                'createdAt' => $user->getCreatedAt()?->format('Y-m-d H:i:s'),
-                'lastLoginAt' => $user->getLastLoginAt()?->format('Y-m-d H:i:s'),
-            ]
-        ]);
+        // This method will be intercepted by Symfony's security logout handler
+        // The actual logout is handled by App\Security\LogoutSuccessHandler
+        throw new \LogicException('This method should never be reached.');
     }
 }

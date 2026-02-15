@@ -29,7 +29,12 @@ services:
             - "@snc_redis.session"
             - { prefix: "session:", ttl: 3600 }
 
-    # OpenAPI Authentication Decorator
-    App\OpenApi\AuthenticationDecorator:
-        decorates: "api_platform.openapi.factory"
-        arguments: ['@App\OpenApi\AuthenticationDecorator.inner']
+    # OpenAPI Authentication Decorator - DISABLED (using NelmioApiDocBundle instead)
+    # App\OpenApi\AuthenticationDecorator:
+    #     decorates: "api_platform.openapi.factory"
+    #     arguments: ['@App\OpenApi\AuthenticationDecorator.inner']
+
+    # Logout success handler
+    App\Security\LogoutSuccessHandler:
+        tags:
+            - { name: 'kernel.event_listener', event: 'Symfony\Component\Security\Http\Event\LogoutEvent', method: 'onLogout' }

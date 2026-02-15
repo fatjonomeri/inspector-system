@@ -7,5 +7,16 @@
 # To list all registered routes, run the following command:
 #   bin/console debug:router
 
+# Load controller routes FIRST to ensure they take priority over API Platform
 controllers:
-    resource: routing.controllers
+    resource:
+        path: ../src/Controller/
+        namespace: App\Controller
+    type: attribute
+
+# API Platform routes loaded after controller routes
+api_platform:
+    resource: .
+    type: api_platform
+    prefix: /api
+

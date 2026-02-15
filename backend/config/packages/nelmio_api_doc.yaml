@@ -1,0 +1,19 @@
+nelmio_api_doc:
+    documentation:
+        info:
+            title: Inspector System API
+            description: API for managing inspector jobs and schedules
+            version: 1.0.0
+        components:
+            securitySchemes:
+                cookieAuth:
+                    type: apiKey
+                    in: cookie
+                    name: PHPSESSID
+        security:
+            - cookieAuth: []
+    areas:
+        path_patterns:
+            - ^/api(?!/docs)
+    models:
+        use_jms: false

@@ -24,12 +24,14 @@ class JobRepository extends ServiceEntityRepository
     public function findAvailable(?Location $location = null): array
     {
         $qb = $this->createQueryBuilder('j')
+            ->leftJoin('j.location', 'l')
+            ->addSelect('l')
             ->where('j.status = :status')
             ->setParameter('status', Job::STATUS_AVAILABLE);
 
         if ($location) {
             $qb->andWhere('j.location = :location')
-               ->setParameter('location', $location);
+            ->setParameter('location', $location);
         }
 
         return $qb->orderBy('j.createdAt', 'DESC')

@@ -18,8 +18,12 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
 #[ApiResource(
     operations: [
-        new Get(),
-        new GetCollection()
+        new Get(
+            security: "is_granted('ROLE_ADMIN') or object == user"
+        ),
+        new GetCollection(
+            security: "is_granted('ROLE_ADMIN')"
+        )
     ]
 )]
 class User implements UserInterface, PasswordAuthenticatedUserInterface

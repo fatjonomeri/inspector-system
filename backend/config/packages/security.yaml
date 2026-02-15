@@ -36,7 +36,6 @@ security:
             # Logout
             logout:
                 path: /api/auth/logout
-                target: /
 
             # Remember me functionality
             remember_me:
