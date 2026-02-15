@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use App\Entity\Location;
 use App\Entity\User;
+use App\Repository\LocationRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -20,7 +22,8 @@ class AuthController extends AbstractController
     public function __construct(
         private EntityManagerInterface $entityManager,
         private UserPasswordHasherInterface $passwordHasher,
-        private ValidatorInterface $validator
+        private ValidatorInterface $validator,
+        private LocationRepository $locationRepository
     ) {
     }
 
@@ -87,9 +90,18 @@ class AuthController extends AbstractController
             ], Response::HTTP_CONFLICT);
         }
 
+        // Find location by code
+        $location = $this->locationRepository->findByCode($data['location']);
+        if (!$location) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Invalid location. Must be one of: UK, Mexico, India'
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
         $user = new User();
         $user->setEmail($data['email']);
-        $user->setLocation($data['location']);
+        $user->setLocation($location);
 
         $hashedPassword = $this->passwordHasher->hashPassword($user, $data['password']);
         $user->setPassword($hashedPassword);
@@ -128,7 +140,7 @@ class AuthController extends AbstractController
             'user' => [
                 'id' => $user->getId(),
                 'email' => $user->getEmail(),
-                'location' => $user->getLocation(),
+                'location' => $user->getLocation()?->getCode(),
                 'roles' => $user->getRoles(),
                 'firstName' => $user->getFirstName(),
                 'lastName' => $user->getLastName(),
@@ -185,7 +197,7 @@ class AuthController extends AbstractController
                 'id' => $user->getId(),
                 'email' => $user->getEmail(),
                 'roles' => $user->getRoles(),
-                'location' => $user->getLocation(),
+                'location' => $user->getLocation()?->getCode(),
                 'firstName' => $user->getFirstName(),
                 'lastName' => $user->getLastName(),
             ]
@@ -243,7 +255,7 @@ class AuthController extends AbstractController
                 'id' => $user->getId(),
                 'email' => $user->getEmail(),
                 'roles' => $user->getRoles(),
-                'location' => $user->getLocation(),
+                'location' => $user->getLocation()?->getCode(),
                 'firstName' => $user->getFirstName(),
                 'lastName' => $user->getLastName(),
                 'timezone' => $user->getTimezone(),

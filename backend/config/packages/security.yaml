@@ -5,6 +5,8 @@ security:
         App\Entity\User:
             algorithm: auto
 
+    role_hierarchy:
+        ROLE_ADMIN: ROLE_INSPECTOR
     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
         app_user_provider:
@@ -51,9 +53,9 @@ security:
         - { path: ^/api/docs, roles: PUBLIC_ACCESS }
         - { path: ^/api/contexts, roles: PUBLIC_ACCESS }
         - { path: ^/api/auth/(login|register), roles: PUBLIC_ACCESS }
-        - { path: ^/api/auth/logout, roles: ROLE_USER }
+        - { path: ^/api/auth/logout, roles: ROLE_INSPECTOR }
         - { path: ^/api/admin, roles: ROLE_ADMIN }
-        - { path: ^/api, roles: ROLE_USER }
+        - { path: ^/api, roles: ROLE_INSPECTOR }
 
 when@test:
     security:

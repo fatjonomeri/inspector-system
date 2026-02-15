@@ -24,10 +24,6 @@ use Symfony\Component\Validator\Constraints as Assert;
 )]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    public const LOCATION_UK = 'UK';
-    public const LOCATION_MEXICO = 'Mexico';
-    public const LOCATION_INDIA = 'India';
-
     public const ROLE_INSPECTOR = 'ROLE_INSPECTOR';
     public const ROLE_ADMIN = 'ROLE_ADMIN';
 
@@ -50,10 +46,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?string $password = null;
 
-    #[ORM\Column(length: 50)]
-    #[Assert\NotBlank]
-    #[Assert\Choice(choices: [self::LOCATION_UK, self::LOCATION_MEXICO, self::LOCATION_INDIA])]
-    private ?string $location = null;
+    #[ORM\ManyToOne(targetEntity: Location::class)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'RESTRICT')]
+    #[Assert\NotNull(message: 'Location is required')]
+    private ?Location $location = null;
 
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $firstName = null;
@@ -147,12 +143,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         // $this->plainPassword = null;
     }
 
-    public function getLocation(): ?string
+    public function getLocation(): ?Location
     {
         return $this->location;
     }
 
-    public function setLocation(string $location): static
+    public function setLocation(?Location $location): static
     {
         $this->location = $location;
 
@@ -209,11 +205,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getTimezone(): string
     {
-        return match ($this->location) {
-            self::LOCATION_UK => 'Europe/London',
-            self::LOCATION_MEXICO => 'America/Mexico_City',
-            self::LOCATION_INDIA => 'Asia/Kolkata',
-            default => 'UTC',
-        };
+        return $this->location?->getTimezone() ?? 'UTC';
     }
 }
