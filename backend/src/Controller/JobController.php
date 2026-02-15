@@ -29,7 +29,7 @@ class JobController extends AbstractController
     #[OA\Get(
         path: '/api/jobs/available',
         summary: 'Get available jobs',
-        description: 'Returns all jobs with status "available"',
+        description: 'Returns all jobs with status "available" and filters by the authenticated user\'s location',
         tags: ['Job'],
         responses: [
             new OA\Response(
@@ -60,7 +60,7 @@ class JobController extends AbstractController
             ], Response::HTTP_UNAUTHORIZED);
         }
 
-        // Get all available jobs (no location filter)
+        // Get all available jobs for the user's location
         $jobs = $this->jobRepository->findAvailable($user->getLocation());
 
         return $this->json([
@@ -139,6 +139,8 @@ class JobController extends AbstractController
 
         $data = json_decode($request->getContent(), true);
         
+
+        //check if scheduled date is provided and is in the future
         if (!isset($data['scheduledDate'])) {
             return $this->json([
                 'success' => false,
@@ -148,6 +150,14 @@ class JobController extends AbstractController
 
         try {
             $scheduledDate = $this->parseFromTimezone($data['scheduledDate'], $user->getTimezone());
+
+            if ($scheduledDate < new \DateTimeImmutable('now')) {
+                return $this->json([
+                    'success' => false,
+                    'message' => 'The scheduled date cannot be in the past.'
+                ], Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
+
             $job->assignTo($user, $scheduledDate);
             
             $this->entityManager->flush();

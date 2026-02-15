@@ -12,6 +12,7 @@ use ApiPlatform\Metadata\Patch;
 use App\Repository\JobRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: JobRepository::class)]
@@ -28,7 +29,27 @@ use Symfony\Component\Validator\Constraints as Assert;
             )
         "),
         new GetCollection(security: "is_granted('ROLE_ADMIN')"),
-        new Post(security: "is_granted('ROLE_ADMIN')")
+        new Post(
+            security: "is_granted('ROLE_ADMIN')",
+            denormalizationContext: ['groups' => ['job:create']],
+            openapi: new \ApiPlatform\OpenApi\Model\Operation(
+                requestBody: new \ApiPlatform\OpenApi\Model\RequestBody(
+                    content: new \ArrayObject([
+                        'application/json' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'required' => ['title', 'location'],
+                                'properties' => [
+                                    'title' => ['type' => 'string', 'example' => 'Safety Inspection - London Office'],
+                                    'description' => ['type' => 'string', 'example' => 'Annual safety inspection of electrical systems'],
+                                    'location' => ['type' => 'string', 'example' => '/api/locations/1', 'description' => 'IRI of the location']
+                                ]
+                            ]
+                        ]
+                    ])
+                )
+            )
+        )
     ]
 )]
 #[ApiFilter(SearchFilter::class, properties: ['status' => 'exact', 'location.id' => 'exact'])]
@@ -38,10 +59,6 @@ class Job
     public const STATUS_ASSIGNED = 'assigned';
     public const STATUS_COMPLETED = 'completed';
 
-    public const LOCATION_UK = 'UK';
-    public const LOCATION_MEXICO = 'Mexico';
-    public const LOCATION_INDIA = 'India';
-
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -49,9 +66,11 @@ class Job
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
+    #[Groups(['job:create'])]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['job:create'])]
     private ?string $description = null;
 
     #[ORM\Column(length: 50)]
@@ -74,6 +93,7 @@ class Job
     #[Assert\NotBlank]
     #[ORM\ManyToOne(targetEntity: Location::class)]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['job:create'])]
     private ?Location $location = null;
 
     #[ORM\Column]
